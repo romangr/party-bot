@@ -1,0 +1,43 @@
+name: Build native image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: graalvm/setup-graalvm@v1
+      with:
+        version: 'latest'
+        java-version: '17'
+        components: 'native-image'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Run tests
+      run: ./gradlew ciTests
+    - name: Build Native image
+      if: github.ref == 'refs/heads/main'
+      run: ./gradlew bootBuildImage
+    - name: Docker Login
+      uses: docker/login-action@v1.10.0
+      with:
+        # Server address of Docker registry. If not set then will default to Docker Hub
+        registry: ghcr.io
+        # Username used to log against the Docker registry
+        username: ${{ github.actor }}
+        # Password or personal access token used to log against the Docker registry
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Tag the image
+      run: docker tag party-bot:0.0.1-SNAPSHOT ghcr.io/romangr/party-bot:latest
+    - name: Publish the Docker image
+      if: github.ref == 'refs/heads/main'
+      run: docker push ghcr.io/romangr/party-bot:latest

@@ -1,0 +1,129 @@
+databaseChangeLog:
+  #  - preConditions:
+  #  - runningAs:
+  #      username: liquibase
+
+  - changeSet:
+      id: 1
+      author: gr
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: createdAt
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+                  defaultValue: now()
+              - column:
+                  name: name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: telegram_id
+                  type: bigint
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: telegram_username
+                  type: varchar(100)
+
+        - createTable:
+            tableName: parties
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+                  defaultValue: now()
+              - column:
+                  name: chat_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: owner_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_owner_id_to_user_id
+                    references: users(id)
+              - column:
+                  name: message_id
+                  type: bigint
+                  defaultValue: null
+
+        - createTable:
+            tableName: seats
+            columns:
+              - column:
+                  name: party_id
+                  type: bigint
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_seats
+                    nullable: false
+              - column:
+                  name: internal_number
+                  type: int
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_seats
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+                  defaultValue: now()
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: true
+                    foreignKeyName: fk_seat_user_id_to_user_id
+                    references: users(id)
+
+        - addUniqueConstraint:
+            tableName: seats
+            columnNames: party_id, user_id
+            constraintName: seats_unique_users
+            deferrable: true
+
+        - createTable:
+            tableName: queues
+            columns:
+              - column:
+                  name: party_id
+                  type: bigint
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+                  defaultValue: now()
+              - column:
+                  name: participants
+                  type: jsonb
+

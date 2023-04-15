@@ -1,0 +1,36 @@
+version: '2.4'
+
+services:
+  postgres:
+    image: postgres:15.2
+    restart: unless-stopped
+#    Uncomment if connection to the DB needed
+#    ports:
+#      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 3M
+        max-file: "2"
+
+  party-bot:
+    depends_on:
+      - postgres
+    image: ghcr.io/romangr/party-bot:latest
+    restart: unless-stopped
+    mem_limit: 150m
+    environment:
+      DB_HOST: postgres
+      DB_PASSWORD: ${DB_PASSWORD}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME}
+    logging:
+      driver: json-file
+      options:
+        max-size: 10M
+        max-file: "3"
+

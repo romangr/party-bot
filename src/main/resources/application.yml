@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:5432/${DB_NAME:postgres}
+    username: postgres
+    password: ${DB_PASSWORD}
+  liquibase:
+    change-log: db/changelog/db-changelog.yml
+
+logging:
+  level:
+    ROOT: INFO
+    net.romangr.partybot: DEBUG
+
+telegram:
+  botUsername: ${TELEGRAM_BOT_USERNAME:party_builder_bot}
+  token: ${TELEGRAM_BOT_TOKEN}
